@@ -2,7 +2,7 @@
 
 pkgname="sysinfo"
 pkgver="0.1.4"
-pkgrel="1"
+pkgrel="2"
 pkgdesc="sysinfo shows system information like the hardware configuration and resource usage in a compact, clearly arranged and
 visually pleasing style."
 arch=("any")
@@ -30,5 +30,7 @@ build() {
 
 package() {
     cd "${srcdir}/${pkgname}-${pkgver}" || return
-    make DESTDIR="${pkgdir}" PREFIX=/usr install
+    make DESTDIR="${pkgdir}" PREFIX=/usr install && \
+    install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md" && \
+    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
