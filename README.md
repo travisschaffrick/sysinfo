@@ -1,17 +1,13 @@
 # sysinfo
-Simple C program for linux machines which acts like a shittier version of fastfetch
+Command line loop which prints selected system variables to monitor
 
-Made JUST 4 FUNZIES!!!!
-
-Sample output:
-
-CPU Usage: 3.10%
-
-Memory Usage: 3.08GiB/30.46GiB (10.12%)
-
-Load Avg: 0.33 0.18 0.18
-
-Uptime: 1 hours, 44 minutes, 43 seconds
+## Features
+Monitor
+- CPU Usage
+- CPU Temp
+- Memory Usage
+- Load Average
+- Uptime
 
 ## Usage:
 1. Be on linux

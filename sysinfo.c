@@ -3,44 +3,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#define MAXBUFLEN 256
+#include "sysinfo.h" // includes <ncurses.h>
 
-#define CPU_IDLE 4
-#define MEM_TOTAL 0
-#define MEM_AVAIL 2
-#define MEM_LOC 1
-#define ONE_MIN 0
-#define FIVE_MIN 1
-#define FIFTEEN_MIN 2
-#define UPTIME 0
-
-struct cpu_usage get_cpu_usage();
-
-struct
-cpu_usage {
-  unsigned long long idle_time; // 10ms
-  unsigned long long total_time; // 10ms
-};
-
-struct
-mem_usage {
-  float total; // kB
-  float avail; // kB
-};
-
-struct
-load_avg {
-  float one_min;
-  float five_min;
-  float fifteen_min;
-};
-
-struct
-uptime {
-  int seconds;
-};
-
-
+//TODO: add cpu temp from /sys/class/hwmon/hwmon2/temp1_input 
 /*
 @brief returns a struct containing the current CPU idle time and total time in units of 10ms
 */
@@ -71,6 +36,26 @@ get_cpu_usage() {
 
   fclose(fp);
   return cpu;
+}
+
+float
+get_cpu_temp() { 
+  int temp; 
+  FILE *fp = fopen("/sys/class/hwmon/hwmon2/temp1_input", "r");
+
+  char line_buffer[MAXBUFLEN];  
+
+  if (fp != NULL) {
+    
+    char *token = strtok(line_buffer, " ");
+    if (fgets(line_buffer, sizeof(line_buffer), fp)) {
+      line_buffer[MAXBUFLEN-1] = '\0';
+      temp = (int)strtoll(token, NULL, 10);
+    }
+  }
+  fclose(fp);
+
+  return temp;
 }
 
 /*
@@ -111,7 +96,7 @@ get_mem_usage() {
 }
 
 struct load_avg
-get_load_avg() {
+get_la() {
   struct load_avg load = {0};
 
   char line_buffer[MAXBUFLEN];  
@@ -163,49 +148,69 @@ get_uptime() {
   return uptime;
 }
 
-int 
-main() {
-  // init cpu
-  struct cpu_usage cpu_usage1 = get_cpu_usage();
-  sleep(1);
-  struct cpu_usage cpu_usage2 = get_cpu_usage();
-
-  while (1) {
-    // clear screen
-
-    // print cpu info
-    cpu_usage2 = get_cpu_usage();
-    float diff_total = cpu_usage2.total_time - cpu_usage1.total_time; 
-    float diff_idle = cpu_usage2.idle_time - cpu_usage1.idle_time;
-
-    // update cpu info
-    cpu_usage1 = cpu_usage2;
-    printf("\e[1;1H\e[2J");
-    sleep(1);
-
-    if (diff_total > 0)
-      printf("CPU Usage: %.2f%%\n", (float)(diff_total - diff_idle ) / (float)diff_total * 100);
-
-
-
-    // get mem info
-    struct mem_usage mem = get_mem_usage();
-    printf("Memory Usage: %.2fGiB/%.2fGiB (%.2f%%)\n",
-        (mem.total - mem.avail) / (1024 * 1024),
-        mem.total / (1024 * 1024),    
-        (mem.total - mem.avail) / mem.total * 100);
-
-    // get load avg
-    struct load_avg load = get_load_avg(); 
-    printf("Load Avg: %.2f %.2f %.2f\n", load.one_min, load.five_min, load.fifteen_min);
-
-    // get uptime
-    struct uptime up = get_uptime();
-    printf("Uptime: %d hours, %d minutes, %d seconds\n", up.seconds/60/60, up.seconds/60 % 60, up.seconds%60);
-    fflush(stdout);
-  }
-  
-  return 0;
+void 
+ncurses_cpu_usage(WINDOW* screen, int y, int x, float diff_total, float diff_idle) {
+  mvwprintw(screen, y, x, "CPU Usage: %.2f%%\n", (diff_total - diff_idle ) / diff_total * 100);
 }
 
+void 
+ncurses_cpu_temp(WINDOW* screen, int y, int x, int temp) {
+  mvwprintw(screen, y, x, "CPU Temp: %.2f\u00B0C", temp / 1000.00);
+}
+
+void
+ncurses_mem(WINDOW* screen, int y, int x, struct mem_usage mem) {
+  mvwprintw(screen, y, x, "Memory Usage: %.2fGiB/%.2fGiB (%.2f%%)",
+      (mem.total - mem.avail) / (1024 * 1024),
+      mem.total / (1024 * 1024),    
+      (mem.total - mem.avail) / mem.total * 100);
+}
+
+void
+ncurses_la(WINDOW* screen, int y, int x, struct load_avg load) {
+  mvwprintw(screen, y, x, "Load Avg: %.2f %.2f %.2f", load.one_min, load.five_min, load.fifteen_min);
+}
+
+void
+ncurses_uptime(WINDOW* screen, int y, int x, struct uptime up) {
+  mvwprintw(screen, y, x, "Uptime: %d hours, %d minutes, %d seconds\n", up.seconds/60/60, up.seconds/60 % 60, up.seconds%60);
+}
+
+void
+ncurses_selected(WINDOW* screen, int y, int x, struct sysinfo sys) {
+    initscr();
+    noecho();
+   
+    mvwprintw(screen, y, x, "'q' to modify settings.");
+    int i = 2; // offset the status messages from the above message
+    if (sys.settings & (1 << 0)) {
+      if (sys.cpu_info.diff_total != 0) {
+        ncurses_cpu_usage(screen, y+i, x, sys.cpu_info.diff_total, sys.cpu_info.diff_idle);
+        i++;
+      }
+    }
+
+    if (sys.settings & (1 << 1)) {
+      ncurses_cpu_temp(screen, y+i, x, sys.cpu_info.temp);
+      i++;
+    }
+
+    if (sys.settings & (1 << 2)) {
+      ncurses_mem(screen, y+i, x, sys.mem_usage);
+      i++;
+    }
+
+    if (sys.settings & (1 << 3)) {
+      ncurses_la(screen, y+i, x, sys.load_avg);
+      i++;
+    }
+
+    if (sys.settings & (1 << 4)) {
+      ncurses_uptime(screen, y+i, x, sys.uptime);
+      i++;
+    }
+
+  refresh();
+  clear();
+  }
 
