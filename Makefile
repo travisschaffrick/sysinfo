@@ -1,0 +1,9 @@
+CC = gcc
+CFLAGS = -Wall -Wextra -Werror
+CLINK = -lncurses
+
+sysinfo: menu.c sysinfo.c sysinfo.h
+	$(CC) $(CFLAGS) $(CLINK) -o sysinfo menu.c sysinfo.c
+
+clean:
+	rm -f sysinfo
