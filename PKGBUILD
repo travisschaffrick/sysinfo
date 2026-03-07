@@ -9,6 +9,7 @@ depends=('ncurses')
 makedepends=('gcc' 'make')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
 sha256sums=('cdc0ab03504253b089d94f69cc1de9997ff5c717a0424d58c0917fcf36f24461')
+>>>>>>> 37aede2 (v0.1.0: Basic monitoring features, simple ncurses menu)
 
 build() {
     cd "$pkgname-$pkgver"
