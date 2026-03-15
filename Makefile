@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 CLINK = -lncurses
 
 sysinfo: menu.c sysinfo.c sysinfo.h
