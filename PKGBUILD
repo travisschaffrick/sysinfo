@@ -1,9 +1,9 @@
-pkgname=sysinfo
+pkgname=systats
 pkgver=1.0.0
 pkgrel=1
 pkgdesc="Simple ncurses-based system monitor"
 arch=('x86_64')
-url="https://github.com/travisschaffrick/sysinfo"
+url="https://github.com/travisschaffrick/systats"
 license=('MIT')
 depends=('ncurses')
 makedepends=('gcc' 'make')
