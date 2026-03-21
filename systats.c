@@ -3,7 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "sysinfo.h" // includes <ncurses.h>
+#include "systats.h" // includes <ncurses.h>
 
 //TODO: change uptime from a struct to just an int
 int
@@ -279,7 +279,7 @@ ncurses_history(WINDOW* screen, int y, int x, struct history h) {
  * @brief print selected options 
  */
 void
-ncurses_selected(WINDOW* screen, int y, int x, struct sysinfo sys) {
+ncurses_selected(WINDOW* screen, int y, int x, struct systats sys) {
     mvwprintw(screen, y, x, "'q' to quit | 's' to change settings");
     int i = 3; // offset the status messages from the above message
     if (sys.settings & (1 << 0)) {
