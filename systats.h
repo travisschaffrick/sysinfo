@@ -69,7 +69,7 @@ uptime {
 };
 
 struct
-sysinfo {
+systats {
   int settings;
   struct cpu_info cpu_info;
   struct mem_usage mem_usage;
@@ -90,6 +90,6 @@ void ncurses_cpu_temp(WINDOW* screen, int y, int x, int temp);
 void ncurses_mem(WINDOW* screen, int y, int x, struct mem_usage mem); 
 void ncurses_la(WINDOW* screen, int y, int x, struct load_avg load); 
 void ncurses_uptime(WINDOW* screen, int y, int x, struct uptime up); 
-void ncurses_selected(WINDOW* screen, int y, int x, struct sysinfo sys);
+void ncurses_selected(WINDOW* screen, int y, int x, struct systats sys);
 
 

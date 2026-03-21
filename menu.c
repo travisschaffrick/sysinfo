@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "sysinfo.h" // includes <ncurses.h>
+#include "systats.h" // includes <ncurses.h>
 
 int 
 main() {
@@ -43,7 +43,7 @@ main() {
 
   size_t count = sizeof(options)/sizeof(options[0]);
 
-  struct sysinfo sys = {0};
+  struct systats sys = {0};
   // user input
   int input = 0;
   int selected = 0;
