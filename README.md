@@ -16,7 +16,7 @@ Monitor
 ## Usage:
 1. Be on linux
 2. `make`
-3. `./sysinfo`
+3. `./systats`
 
 ## Taster:
 ```
